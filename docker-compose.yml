@@ -1,0 +1,48 @@
+version: '2'
+services:
+  strider:     
+    build: ./strider
+    image: strider
+    container_name: strider
+    command: sh -c "/opt/strider/src/bin/strider addUser --email admin@admin.admin --password password --force --admin true &&  npm start"
+    environment:
+      - DB_URI=mongodb://mongo:27017/strider
+    ports:
+      - 3000:3000
+    volumes:
+      - ./strider/data:/data
+    depends_on:
+      - mongo
+    networks:
+      - strider
+ 
+  scm-manager:
+    image: scmmanager/scm-manager:latest
+    container_name: scm-manager
+    ports:
+      - 8080:8080
+    volumes:
+      - ./scm/data:/var/lib/scm
+  
+  zentao:
+    image: idoop/zentao:latest
+    container_name: zentao
+    ports:
+      - "80:80"
+      - "3306:3306"
+    environment:
+      USER: "root"
+      PASSWD: "123456"
+      BIND_ADDRESS: "false"  
+    volumes:
+      - ./zentao/data:/opt/zbox/
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    networks:
+      - strider
+
+networks:
+  strider:
