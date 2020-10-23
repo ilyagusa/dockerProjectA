@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+import os
+import sys
+
+def go_command(command):
+    print(f"Run #{command}")
+    os.system(command)
+
+def zip(pathzip):
+    abs_path = os.path.abspath("..")
+    abs_path_zip = os.path.abspath(pathzip)
+    go_command("sudo rm -rf /var/backup")
+    go_command("sudo mkdir /var/backup/")
+    go_command(f"sudo cp -r {abs_path}/zentao/data /var/backup/zentao")
+    go_command(f"sudo cp -r {abs_path}/strider/data /var/backup/strider")
+    go_command(f"sudo cp -r {abs_path}/scm/data /var/backup/scm")
+    go_command(f"sudo tar -cvf {abs_path_zip} /var/backup")
+
+def unzip(pathzip):
+    abs_path = os.path.abspath("..")
+    abs_path_zip = os.path.abspath(pathzip)
+    go_command(f"sudo rm -rf {abs_path}/strider/data")
+    go_command(f"sudo rm -rf {abs_path}/zentao/data")
+    go_command(f"sudo rm -rf {abs_path}/scm/data")
+    go_command(f"sudo tar -xvf {abs_path_zip} -C  {abs_path}")
+    go_command(f"sudo cp -r {abs_path}/var/backup/strider {abs_path}/strider/data")
+    go_command(f"sudo cp -r {abs_path}/var/backup/zentao {abs_path}/zentao/data")
+    go_command(f"sudo cp -r {abs_path}/var/backup/scm {abs_path}/scm/data")
+    go_command(f"sudo rm -rf {abs_path}/var")
+
+
+param_method = sys.argv[1]
+param_zip_path = sys.argv[2]
+if param_method == "zip":
+    zip(param_zip_path)
+if param_method == "unzip":
+    if os.path.exists(os.path.abspath(param_zip_path)):
+        unzip(param_zip_path)

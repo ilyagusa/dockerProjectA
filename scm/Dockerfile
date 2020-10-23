@@ -24,6 +24,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # run scm-manager
+RUN chmod -R 777 /var/lib/scm
 WORKDIR /var/lib/scm
 VOLUME /var/lib/scm
 EXPOSE 8080

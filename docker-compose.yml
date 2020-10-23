@@ -1,16 +1,15 @@
-version: '2'
+version: '3'
 services:
   strider:     
-    build: ./strider
+    build: ./strider 
     image: strider
     container_name: strider
-    command: sh -c "/opt/strider/src/bin/strider addUser --email admin@admin.admin --password password --force --admin true &&  npm start"
     environment:
       - DB_URI=mongodb://mongo:27017/strider
+      - STRIDER_ADMIN_EMAIL=admin@admin.com
+      - STRIDER_ADMIN_PASSWORD=admin
     ports:
       - 3000:3000
-    volumes:
-      - ./strider/data:/data
     depends_on:
       - mongo
     networks:
@@ -41,6 +40,8 @@ services:
     image: mongo
     container_name: mongo
     restart: always
+    volumes:
+      - ./strider/data/:/data/db
     networks:
       - strider
 

@@ -1,16 +1,24 @@
-FROM ubuntu:focal
+FROM ubuntu:14.04
+MAINTAINER Keyvan Fatehi <keyvanfatehi@gmail.com>
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV STRIDER_TAG v1.6.4
+ENV STRIDER_REPO https://github.com/Strider-CD/strider
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8  
 
 RUN apt-get update && \
-  apt-get install -y git python3-pip curl  mongodb
+  apt-get install -y git supervisor python-pip curl && \
+  pip install supervisor-stdout && \
+  sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisor/supervisord.conf && \
+  curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash - && \
+  apt-get install -y nodejs
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-RUN apt-get install -y nodejs 
-RUN apt-get install -y ruby ruby-all-dev
-RUN gem install bundler
-RUN npm install -g node-gyp
+ADD sv_stdout.conf /etc/supervisor/conf.d/
 
+VOLUME /home/strider/.strider
 RUN mkdir -p /home/strider && mkdir -p /opt/strider
 RUN adduser --disabled-password --gecos "" --home /home/strider strider
 RUN chown -R strider:strider /home/strider
@@ -19,14 +27,13 @@ RUN ln -s /opt/strider/src/bin/strider /usr/local/bin/strider
 USER strider
 ENV HOME /home/strider
 
+#RUN git clone --branch $STRIDER_TAG --depth 1 $STRIDER_REPO /opt/strider/src && \
+#  cd /opt/strider/src && npm install && npm run build
 RUN git clone https://github.com/Strider-CD/strider /opt/strider/src && \
-  cd /opt/strider/src && git checkout v1.11.0 && npm install
+  cd /opt/strider/src && git checkout v1.11.0 && npm install && npm run build
+
+COPY start.sh /usr/local/bin/start.sh
+ADD strider.conf /etc/supervisor/conf.d/strider.conf
 EXPOSE 3000
 USER root
-WORKDIR  /opt/strider/src
-RUN apt-get install -y jq
-ENV NODE_ENV=production
-RUN chmod -R 777 ./bin/
-#CMD ["npm", "start"]
-
-
+CMD ["bash", "/usr/local/bin/start.sh"]
