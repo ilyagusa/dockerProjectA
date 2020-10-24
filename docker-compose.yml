@@ -30,8 +30,8 @@ services:
       - "80:80"
       - "3306:3306"
     environment:
-      USER: "root"
-      PASSWD: "123456"
+      ADMINER_USER: "root"
+      ADMINER_PASSWD: "123456"
       BIND_ADDRESS: "false"  
     volumes:
       - ./zentao/data:/opt/zbox/
